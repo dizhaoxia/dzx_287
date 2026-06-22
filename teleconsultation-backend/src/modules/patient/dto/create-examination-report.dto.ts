@@ -3,6 +3,10 @@ import { IsString, IsOptional } from 'class-validator';
 export class CreateExaminationReportDto {
   @IsOptional()
   @IsString()
+  patientId?: string;
+
+  @IsOptional()
+  @IsString()
   reportName?: string;
 
   @IsOptional()

@@ -238,6 +238,7 @@ export class PatientService {
   async createPatient(createPatientDto: CreatePatientDto): Promise<Patient> {
     const newPatient: Patient = {
       id: `patient-${Date.now()}`,
+      userId: createPatientDto.userId || `user-${Date.now()}`,
       ...createPatientDto,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -506,5 +507,85 @@ export class PatientService {
 
   async updateAllergies(patientId: string, allergies: string[]): Promise<string[]> {
     return allergies;
+  }
+
+  async getAllMedicalRecords(
+    page: number = 1,
+    pageSize: number = 10,
+    keyword?: string,
+  ): Promise<{ list: MedicalRecord[]; total: number; page: number; pageSize: number }> {
+    const pageNum = Number(page) || 1;
+    const pageSizeNum = Number(pageSize) || 10;
+
+    let filtered = [...this.mockMedicalRecords];
+
+    if (keyword) {
+      filtered = filtered.filter(
+        r =>
+          r.chiefComplaint?.includes(keyword) ||
+          r.diagnosis?.includes(keyword) ||
+          r.department?.includes(keyword) ||
+          r.doctorName?.includes(keyword),
+      );
+    }
+
+    const total = filtered.length;
+    const start = (pageNum - 1) * pageSizeNum;
+    const list = filtered.sort((a, b) => b.visitDate.getTime() - a.visitDate.getTime()).slice(start, start + pageSizeNum);
+
+    return { list, total, page: pageNum, pageSize: pageSizeNum };
+  }
+
+  async getAllExaminationReports(
+    page: number = 1,
+    pageSize: number = 10,
+    keyword?: string,
+  ): Promise<{ list: ExaminationReport[]; total: number; page: number; pageSize: number }> {
+    const pageNum = Number(page) || 1;
+    const pageSizeNum = Number(pageSize) || 10;
+
+    let filtered = [...this.mockExaminationReports];
+
+    if (keyword) {
+      filtered = filtered.filter(
+        r =>
+          r.reportName?.includes(keyword) ||
+          r.reportType?.includes(keyword) ||
+          r.department?.includes(keyword) ||
+          r.conclusion?.includes(keyword),
+      );
+    }
+
+    const total = filtered.length;
+    const start = (pageNum - 1) * pageSizeNum;
+    const list = filtered.sort((a, b) => b.examinationDate.getTime() - a.examinationDate.getTime()).slice(start, start + pageSizeNum);
+
+    return { list, total, page: pageNum, pageSize: pageSizeNum };
+  }
+
+  async getAllAllergies(
+    page: number = 1,
+    pageSize: number = 10,
+    keyword?: string,
+  ): Promise<{ list: Allergy[]; total: number; page: number; pageSize: number }> {
+    const pageNum = Number(page) || 1;
+    const pageSizeNum = Number(pageSize) || 10;
+
+    let filtered = [...this.mockAllergies];
+
+    if (keyword) {
+      filtered = filtered.filter(
+        a =>
+          a.allergenName?.includes(keyword) ||
+          a.allergenType?.includes(keyword) ||
+          a.reactionDescription?.includes(keyword),
+      );
+    }
+
+    const total = filtered.length;
+    const start = (pageNum - 1) * pageSizeNum;
+    const list = filtered.slice(start, start + pageSizeNum);
+
+    return { list, total, page: pageNum, pageSize: pageSizeNum };
   }
 }
